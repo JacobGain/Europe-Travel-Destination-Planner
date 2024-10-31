@@ -42,8 +42,7 @@ app.get('/api/destinations/:id', (req, res) => {
         Description: destination["Description"]
     };
 
-    res.json(destinationInfo)
-
+    res.json(destinationInfo);
 });
 
 // item 2, get geographical coordinates of a given destination ID
@@ -54,9 +53,20 @@ app.get('/api/destinations/geocoordinates/:id', (req, res) => {
         Longitude: destination["Longitude"] 
     };
 
-    res.json(coordinates)
-
+    res.json(coordinates);
 });
+
+// item 3, get all available country names
+app.get('/api/countries', (req, res) => {
+    const countryNames = []
+    for(let i = 0; i < destinationsJSON.length; i++) {
+        const countryName = destinationsJSON[i]["Country"]
+        if (!countryNames.some(c => c.name === countryName))
+            countryNames.push({name: countryName});
+    };
+
+    res.json(countryNames);
+})
 
 // PORT environment variable, part of enviro where process runs
 const port = 3000
