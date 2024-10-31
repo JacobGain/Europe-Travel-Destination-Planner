@@ -42,11 +42,21 @@ app.get('/api/destinations/:id', (req, res) => {
         Description: destination["Description"]
     };
 
-    res.send(destinationInfo)
+    res.json(destinationInfo)
 
 });
 
+// item 2, get geographical coordinates of a given destination ID
+app.get('/api/destinations/geocoordinates/:id', (req, res) => {
+    const destination = destinationsJSON[req.params.id - 1]
+    const coordinates = { 
+        Latitude: destination["Latitude"],
+        Longitude: destination["Longitude"] 
+    };
 
+    res.json(coordinates)
+
+});
 
 // PORT environment variable, part of enviro where process runs
 const port = 3000
