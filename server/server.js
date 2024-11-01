@@ -132,13 +132,42 @@ app.post('/api/lists/newlist/:listname', (req, res) => {
 
             // Respond with success message
             res.send(`List "${listname}" created successfully!`);
-        });
-    });
-})
+        }); // end of writefile
+    }); // end of readfile
+});
 
 // item 6, save list of IDs to a given list name, return error if name does not exist
-app.put('/api/lists/updatelist/:listname', (req, res) => {
+app.put('/api/lists/updatelist/:listname/destinationIDs', (req, res) => {
+    const listname = req.params.listname; // get the listname from the parameters
+    const listsPath = "data/lists.json"; // hardcoded path to lists.json
+    const { destinationIDs } = req.body; // get the destination IDs from the request body
 
+    // read the lists.json file
+    fs.readFile(listsPath, "utf-8", (err, data) => {
+        let lists; // create an object to store the lists
+
+        if(err) // cannot read lists.json
+            return res.status(500).send(`Error reading lists.json: ${err.message}`);
+
+        // parse the data in the file if read successfully
+        lists = data.trim() ? JSON.parse(data) : {};
+
+        // check if the list exists
+        if(!lists[listname])
+            return res.status(404).send(`List "${listname}" does not exist`);
+
+        // replace existing destination IDs with new values
+        lists[listname] = destinationIDs
+
+        // write the updated lists back to the file
+        fs.writeFile(listsPath, JSON.stringify(lists, null, 2), (err) => {
+            if(err) // error writing to lists.json
+                return res.status(500).send(`Error writing to lists.json: ${err.message}`);
+
+            // display success message
+            res.json({message: `Destination IDs updated successfully for list  "${listname}".`});
+        }); // end of writefile
+    }); // end of readfile
 });
 
 // PORT environment variable, part of enviro where process runs
