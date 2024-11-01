@@ -165,7 +165,7 @@ app.put('/api/lists/updatelist/:listname/destinationIDs', (req, res) => {
                 return res.status(500).send(`Error writing to lists.json: ${err.message}`);
 
             // display success message
-            res.json({ message: `Destination IDs updated successfully for list  "${listname}".` });
+            res.json({ message: `Destination IDs updated successfully for list: "${listname}".` });
         }); // end of writefile
     }); // end of readfile
 });
@@ -191,6 +191,39 @@ app.get('/api/lists/getIDs/:listname', (req, res) => {
 
         const destinationIDs = lists[listname];
         res.json(destinationIDs);
+    }); // end of readfile
+});
+
+// item 8, delete a list of desination IDs for a given list name
+app.delete('/api/lists/delete/:listname', (req, res) => {
+    const listname = req.params.listname; // get the listname from the parameters
+    const listsPath = "data/lists.json"; // hardcoded path to lists.json
+
+    // read the lists.json file
+    fs.readFile(listsPath, "utf-8", (err, data) => {
+        let lists; // create an object to store the lists
+
+        if (err) // cannot read lists.json
+            return res.status(500).send(`Error reading lists.json: ${err.message}`);
+
+        // parse the data in the file if read successfully
+        lists = data.trim() ? JSON.parse(data) : {};
+
+        // check if the list exists
+        if (!lists[listname])
+            return res.status(404).send(`List "${listname}" does not exist`);
+
+        // delete the list
+        delete lists[listname];
+
+         // write the updated lists back to the file
+         fs.writeFile(listsPath, JSON.stringify(lists, null, 2), (err) => {
+            if (err) // error writing to lists.json
+                return res.status(500).send(`Error writing to lists.json: ${err.message}`);
+
+            // display success message
+            res.json({ message: `Successfully deleted list:  "${listname}".` });
+        }); // end of writefile
     }); // end of readfile
 });
 
