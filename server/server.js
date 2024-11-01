@@ -95,6 +95,52 @@ app.get('/api/search/:field/:pattern/:n?', (req, res) => {
     } catch (error) { res.status(500).send(`Error processing request: ${error.message}`); }
 });
 
+// item 5, create new list with given name, return error if name exists
+app.post('/api/lists/newlist/:listname', (req, res) => {
+    const listname = req.params.listname; // get the name of the (probably) new list from the parameters
+    const listsPath = "data/lists.json"; // hardcoded path to lists.json
+
+    // read the lists.json file
+    fs.readFile(listsPath, "utf8", (err, data) => {
+        let lists; // create an object for storing the lists
+
+        if (err) {
+            if (err.code === 'ENOENT') {
+                // if the file does not exist, initialize with an empty object
+                lists = {};
+            } else {
+                // handle any other reading errors
+                return res.status(500).send(`Error reading lists.json: ${err.message}`);
+            }
+        } else {
+            // parse the existing data if the file was read successfully
+            lists = data.trim() ? JSON.parse(data) : {};
+        }
+
+        // check if the list name already exists
+        if (lists[listname])
+            return res.status(400).send(`List "${listname}" already exists.`);
+
+
+        // add the new list with an empty array of destination IDs
+        lists[listname] = [];
+
+        // write the updated lists back to the file
+        fs.writeFile(listsPath, JSON.stringify(lists, null, 2), (err) => {
+            if (err)
+                return res.status(500).send(`Error writing to lists.json: ${err.message}`);
+
+            // Respond with success message
+            res.send(`List "${listname}" created successfully!`);
+        });
+    });
+})
+
+// item 6, save list of IDs to a given list name, return error if name does not exist
+app.put('/api/lists/updatelist/:listname', (req, res) => {
+
+});
+
 // PORT environment variable, part of enviro where process runs
 const port = 3000
 app.listen(port, () => console.log(`Listening on port ${port}...`))
