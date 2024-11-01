@@ -146,14 +146,14 @@ app.put('/api/lists/updatelist/:listname/destinationIDs', (req, res) => {
     fs.readFile(listsPath, "utf-8", (err, data) => {
         let lists; // create an object to store the lists
 
-        if(err) // cannot read lists.json
+        if (err) // cannot read lists.json
             return res.status(500).send(`Error reading lists.json: ${err.message}`);
 
         // parse the data in the file if read successfully
         lists = data.trim() ? JSON.parse(data) : {};
 
         // check if the list exists
-        if(!lists[listname])
+        if (!lists[listname])
             return res.status(404).send(`List "${listname}" does not exist`);
 
         // replace existing destination IDs with new values
@@ -161,12 +161,36 @@ app.put('/api/lists/updatelist/:listname/destinationIDs', (req, res) => {
 
         // write the updated lists back to the file
         fs.writeFile(listsPath, JSON.stringify(lists, null, 2), (err) => {
-            if(err) // error writing to lists.json
+            if (err) // error writing to lists.json
                 return res.status(500).send(`Error writing to lists.json: ${err.message}`);
 
             // display success message
-            res.json({message: `Destination IDs updated successfully for list  "${listname}".`});
+            res.json({ message: `Destination IDs updated successfully for list  "${listname}".` });
         }); // end of writefile
+    }); // end of readfile
+});
+
+// item 7, get the list of destination IDs for a given list name
+app.get('/api/lists/getIDs/:listname', (req, res) => {
+    const listname = req.params.listname; // get the listname from the parameters
+    const listsPath = "data/lists.json"; // hardcoded path to lists.json
+
+    // read the lists.json file
+    fs.readFile(listsPath, "utf-8", (err, data) => {
+        let lists; // create an object to store the lists
+
+        if (err) // cannot read lists.json
+            return res.status(500).send(`Error reading lists.json: ${err.message}`);
+
+        // parse the data in the file if read successfully
+        lists = data.trim() ? JSON.parse(data) : {};
+
+        // check if the list exists
+        if (!lists[listname])
+            return res.status(404).send(`List "${listname}" does not exist`);
+
+        const destinationIDs = lists[listname];
+        res.json(destinationIDs);
     }); // end of readfile
 });
 
