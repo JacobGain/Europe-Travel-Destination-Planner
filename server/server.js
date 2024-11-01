@@ -98,8 +98,7 @@ app.get('/api/search/:field/:pattern/:n?', (req, res) => {
 // item 5, create new list with given name, return error if name exists
 app.post('/api/lists/newlist/:listname', (req, res) => {
     const listname = req.params.listname; // get the name of the (probably) new list from the parameters
-    const listsPath = "data/lists.json"; // hardcoded path to lists.json
-
+    
     // read the lists.json file
     fs.readFile(listsPath, "utf8", (err, data) => {
         let lists; // create an object for storing the lists
@@ -165,7 +164,7 @@ app.put('/api/lists/updatelist/:listname/destinationIDs', (req, res) => {
                 return res.status(500).send(`Error writing to lists.json: ${err.message}`);
 
             // display success message
-            res.json({ message: `Destination IDs updated successfully for list: "${listname}".` });
+            res.send(`Destination IDs updated successfully for list: "${listname}".`);
         }); // end of writefile
     }); // end of readfile
 });
@@ -222,8 +221,47 @@ app.delete('/api/lists/delete/:listname', (req, res) => {
                 return res.status(500).send(`Error writing to lists.json: ${err.message}`);
 
             // display success message
-            res.json({ message: `Successfully deleted list:  "${listname}".` });
+            res.send(`Successfully deleted list:  "${listname}".`);
         }); // end of writefile
+    }); // end of readfile
+});
+
+// item 9, get a list of destination names, countries, coordinates, currency, and language of all destinations from list
+app.get('/api/lists/getinfo/:listname', (req, res) => {
+    const listname = req.params.listname;
+    const listsPath = "data/lists.json"; // hardcoded path to lists.json
+
+    fs.readFile(listsPath, "utf8", (err, data) => {
+        let lists; // create an object to store the lists
+
+        if (err) // cannot read lists.json
+            return res.status(500).send(`Error reading lists.json: ${err.message}`);
+
+        // parse the data in the file if read successfully
+        lists = data.trim() ? JSON.parse(data) : {};
+
+        // check if the list exists
+        if (!lists[listname])
+            return res.status(404).send(`List "${listname}" does not exist`);
+
+        // store the destination IDs of given list in an object
+        const destinationIDs = lists[listname];
+
+        // store info of destination
+        const destinationInfo = destinationIDs.map(id => {
+            const destination = destinationsJSON[id-1];
+            return {
+                    Destination: destination["Destination"],
+                    Region: destination["Region"],
+                    Country: destination["Country"],
+                    Latitude: destination["Latitude"],
+                    Longitude: destination["Longitude"],
+                    Currency: destination["Currency"],
+                    Language: destination["Language"]
+            }; // return the object with appropriate info
+        }); // end of map
+
+        res.json(destinationInfo);
     }); // end of readfile
 });
 
