@@ -4,22 +4,22 @@ let map; // declare the map globally
 
 // function to validate text-only input
 function validateTextInput(input) {
-    const textOnlyRegex = /^[A-Za-z\s]+$/;
+    const textOnlyRegex = /^[A-Za-z\s]+$/; // allow only alphabet characters, case insensitive
     return textOnlyRegex.test(input);
-}
+} // end of validateTextInput function
 
 // function to sanitize input using DOMPurify
 function sanitizeInput(input) {
-    return DOMPurify.sanitize(input);
-}
+    return DOMPurify.sanitize(input); // library used to sanitize the input
+} // end of sanitizeInput
 
 // function to search for the destinations fitting the field/pattern input from user
 async function searchDestinations() {
-    const field = document.getElementById("search-field").value;
-    let pattern = document.getElementById("search-pattern").value;
+    const field = document.getElementById("search-field").value; // get the field value
+    let pattern = document.getElementById("search-pattern").value; // get the pattern value
 
     // client-side input validation
-    if (!validateTextInput(pattern)) {
+    if (!validateTextInput(pattern)) { // if the input is invalid
         alert("Search pattern should only contain text (letters and spaces).");
         return; // stop the function if validation fails
     }
@@ -37,7 +37,7 @@ async function searchDestinations() {
 
     // initialize the map if it doesn't exist or reset it
     if (!map) {
-        map = L.map('map').setView([51.505, -0.09], 2); // Default center and zoom
+        map = L.map('map').setView([51.505, -0.09], 2); // default center and zoom
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
@@ -47,7 +47,7 @@ async function searchDestinations() {
                 map.removeLayer(layer);
             }
         });
-    }
+    } // end of if/else
 
     // fetch data from the server
     const response = await fetch(`/api/search/${field}/${encodeURIComponent(pattern)}`);
@@ -55,9 +55,9 @@ async function searchDestinations() {
         console.error(`Failed to fetch search results: ${response.statusText}`);
         alert(`Error fetching search results: ${response.statusText}`);
         return;
-    }
+    } // end of if
 
-    const data = await response.json();
+    const data = await response.json(); // if response was successful, get the json response
 
     // split data into pages and display destinations
     const pages = [];
@@ -83,47 +83,35 @@ async function searchDestinations() {
                         Region: ${destination["Region"]}<br>
                         Country: ${destination["Country"]}
                     `);
-                }
+                } // end of inner if 
             } else {
                 console.error(`Failed to fetch destination with ID ${id + 1}`);
-            }
-        }
+            } // end of if/else
+        } // end of for
 
         resultsContainer.appendChild(pageDiv);
         pages.push(pageDiv);
-    }
+    } // end of outer for
 
     // update navigation buttons
     updateNavigation(pages);
-}
 
-// function to add a marker to the map
-function addMapMarker(destination) {
-    const lat = parseFloat(destination["Latitude"]);
-    const lon = parseFloat(destination["Longitude"]);
-    if (!isNaN(lat) && !isNaN(lon)) {
-        const marker = L.marker([lat, lon]).addTo(map);
-        marker.bindPopup(`
-            <strong>${destination["Destination"]}</strong><br>
-            Region: ${destination["Region"]}<br>
-            Country: ${destination["Country"]}
-        `);
-    }
-}
+} // end of searchDestinations function
 
 // update navigation buttons based on current page and total pages
 function updateNavigation(pages) {
     document.getElementById("next-page").onclick = () => changePage(pages, 1);
     document.getElementById("prev-page").onclick = () => changePage(pages, -1);
-}
+} // end of updateNavigation function
 
 // change the current page by incrementing/decrementing the page index
 function changePage(pages, direction) {
     pages[currentPage].style.display = "none"; // hide current page
     currentPage = Math.max(0, Math.min(currentPage + direction, pages.length - 1));
     pages[currentPage].style.display = "block"; // show new current page
-}
+} // end of changePanges method
 
+// function used to display the destinations from search result, and from list retrieval
 function displayDestination(destination, resultsContainer) {
 
     // create a container for each destination
@@ -257,13 +245,9 @@ function displayDestination(destination, resultsContainer) {
 
     // append the destinationDiv to the resultsContainer
     resultsContainer.appendChild(destinationDiv);
-}
+} // end of displayDestination function
 
-function addMapMarker(lat, lon) {
-    const marker = L.marker([lat, lon]).addTo(map);
-    marker.bindPopup(`Coordinates: ${lat}, ${lon}`).openPopup();
-}
-
+// function used to create a list of favourite destinations
 async function createList() {
     const listname = document.getElementById("list-name").value;
     const response = await fetch(`/api/lists/newlist/${listname}`, { method: "POST" });
@@ -280,9 +264,10 @@ async function createList() {
     } else {
         const errorMessage = await response.text();
         alert(`Error: ${errorMessage}`); // show error message if list already exists
-    }
-}
+    } // end of if/else
+} // end of createList function
 
+// function used to retrieve the destinations from a favourites lise
 async function retrieveList() {
     const listname = document.getElementById("list-name").value;
     const resultsContainer = document.getElementById("lists-display");
@@ -298,7 +283,7 @@ async function retrieveList() {
         const errorMessage = await response.text();
         alert(`Error: ${errorMessage}`); // Show error message if list doesn't exist or if there's a server error
         return;
-    }
+    } // end of if
 
     // Parse the array of destination IDs
     const destinationIDs = await response.json();
@@ -312,18 +297,19 @@ async function retrieveList() {
             displayDestination(destination, resultsContainer); // Display each destination
         } else {
             console.error(`Failed to fetch destination with ID ${id + 1}`);
-        }
-    }
-}
+        } // end of if/else
+    } // end of for
+} // end of retrieveList function
 
+// function used to delete a favourites list
 async function deleteList() {
     const listname = document.getElementById("list-name").value;
     const resultsContainer = document.getElementById("lists-display");
 
     // clear any existing content in the results container
-    while (resultsContainer.firstChild) {
+    while (resultsContainer.firstChild)
         resultsContainer.removeChild(resultsContainer.firstChild);
-    }
+    
 
     // send DELETE request to the server
     const response = await fetch(`/api/lists/delete/${listname}`, { method: "DELETE" });
@@ -335,41 +321,53 @@ async function deleteList() {
     } else {
         const errorMessage = await response.text();
         alert(`Error: ${errorMessage}`); // Show error message if list doesn't exist or if there's a server error
-    }
-}
+    } // end of if/else
+} // end of deleteList function
 
+// function used to add destinations to a favourites list from the text box
 async function addDestinationsToList() {
-    const input = document.getElementById("destination-names").value; // Assuming you have a text box with this ID
-    const destinationNames = input.split(',').map(name => name.trim()); // Split and trim the input
+    const input = document.getElementById("destination-names").value;
+    const destinationNames = input.split(',').map(name => name.trim()); // split and trim the input
+
+    // client-side input validation for each destination name
+    for (const name of destinationNames) {
+        if (!validateTextInput(name)) {
+            alert("Destination names should only contain text (letters and spaces).");
+            return; // stop the function if validation fails
+        } // end of if
+    } // end of for
+
+    // sanitize each destination name
+    const sanitizedNames = destinationNames.map(name => sanitizeInput(name));
+
     const listname = document.getElementById("list-name").value;
     const destinationIDs = [];
-
     const resultsContainer = document.getElementById("lists-display");
-    
+
     // clear any existing content in the results container
     while (resultsContainer.firstChild)
         resultsContainer.removeChild(resultsContainer.firstChild);
 
-    for (const name of destinationNames) {
+    for (const name of sanitizedNames) {
         try {
-            // Make a fetch call to your server to search for the destination by name
+            // make a fetch call to the server to search for the destination by name
             const response = await fetch(`/api/search/Destination/${encodeURIComponent(name)}/1`);
             if (!response.ok) {
                 throw new Error(`Error fetching destination for "${name}": ${response.statusText}`);
-            }
+            } // end of first if
 
             const ids = await response.json();
             if (ids.length > 0) {
-                destinationIDs.push(ids[0]); // Add 1 to the index to get the ID
+                destinationIDs.push(ids[0]); // add 1 to the index to get the ID
             } else {
                 console.warn(`No destination found for "${name}"`);
-            }
+            } // end of second if/else
         } catch (error) {
             console.error(`Error adding destination "${name}":`, error);
-        }
-    }
+        } // end of try/catch
+    } // end of for
 
-    // Now update the list with the gathered destination IDs
+    // update the list with the gathered destination IDs
     try {
         const updateResponse = await fetch(`/api/lists/updatelist/${listname}/destinationIDs`, {
             method: 'PUT',
@@ -377,38 +375,38 @@ async function addDestinationsToList() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ destinationIDs }),
-        });
+        }); // end of fetch
 
-        if (!updateResponse.ok) {
+        if (!updateResponse.ok)
             throw new Error(`Error updating list: ${updateResponse.statusText}`);
-        }
-
+        
         const result = await updateResponse.text();
         console.log(result); // success message
     } catch (error) {
         console.error('Error updating the list:', error);
-    }
-}
+    } // end of try/catch
+} // end of addDestinationsToList function
 
+// function to sort the displayed list by country, region, or name
 async function sortDisplayedList() {
-    const sortField = document.getElementById("sort-field").value;
-    const listName = document.getElementById("list-name").value;
-    const resultsContainer = document.getElementById("lists-display");
+    const sortField = document.getElementById("sort-field").value; // get field
+    const listName = document.getElementById("list-name").value; // get list name
+    const resultsContainer = document.getElementById("lists-display"); // results container
 
-    // Retrieve the list data
+    // retrieve the list data
     const response = await fetch(`/api/lists/getIDs/${listName}`);
 
     if (!response.ok) {
         const errorMessage = await response.text();
         alert(`Error: ${errorMessage}`);
         return;
-    }
+    } // error response, leave function
 
-    // Parse the array of destination IDs
+    // parse the array of destination IDs
     const destinationIDs = await response.json();
     const destinations = [];
 
-    // Fetch each destination's details and push them to the array
+    // fetch each destination details and push them to the array
     for (const id of destinationIDs) {
         const destinationResponse = await fetch(`/api/destinations/${id + 1}`);
         if (destinationResponse.ok) {
@@ -416,32 +414,33 @@ async function sortDisplayedList() {
             destinations.push(destination);
         } else {
             console.error(`Failed to fetch destination with ID ${id + 1}`);
-        }
-    }
+        } // end of if/else
+    } // end of for
 
-    // Sort the destinations based on the selected field
+    // sort the destinations based on the selected field
     destinations.sort((a, b) => {
         if (a[sortField] < b[sortField]) return -1;
         if (a[sortField] > b[sortField]) return 1;
         return 0;
-    });
+    }); // end of destinations.sort
 
-    // Clear existing content in the results container right before displaying the sorted data
-    while (resultsContainer.firstChild) {
+    /* clear existing content in the results container right before displaying the sorted data,
+        so that it does not display duplicates */
+    while (resultsContainer.firstChild)
         resultsContainer.removeChild(resultsContainer.firstChild);
-    }
+    
 
-    // Display each sorted destination using displayDestination()
+    // display each sorted destination using displayDestination()
     destinations.forEach(destination => {
         displayDestination(destination, resultsContainer);
-    });
-}
+    }); // end of forEach to display
+} // end of sortDisplayedList function
 
-// Add event listeners for client-side validation on relevant input fields
+// add event listeners for client-side validation on relevant input fields
 document.getElementById("search-pattern").addEventListener("input", function () {
     if (!validateTextInput(this.value)) {
         this.style.borderColor = "red";
     } else {
-        this.style.borderColor = ""; // Reset to default if valid
+        this.style.borderColor = ""; // reset to default if valid
     }
 });
