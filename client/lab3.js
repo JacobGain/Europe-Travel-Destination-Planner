@@ -1,38 +1,41 @@
-let currentPage = 0; // Track the current page index
+let currentPage = 0; // track the current page index
 
-let map; // Declare the map globally
+let map; // declare the map globally
 
-// Function to validate text-only input
+// function to validate text-only input
 function validateTextInput(input) {
     const textOnlyRegex = /^[A-Za-z\s]+$/;
     return textOnlyRegex.test(input);
 }
 
-// Function to sanitize input using DOMPurify
+// function to sanitize input using DOMPurify
 function sanitizeInput(input) {
     return DOMPurify.sanitize(input);
 }
 
+// function to search for the destinations fitting the field/pattern input from user
 async function searchDestinations() {
     const field = document.getElementById("search-field").value;
     let pattern = document.getElementById("search-pattern").value;
 
-    // Client-side input validation
+    // client-side input validation
     if (!validateTextInput(pattern)) {
         alert("Search pattern should only contain text (letters and spaces).");
-        return; // Stop the function if validation fails
+        return; // stop the function if validation fails
     }
 
-    // Sanitize input
+    // sanitize input
     pattern = sanitizeInput(pattern);
 
+    // prepare for the pagination
     const resultsPerPage = parseInt(document.getElementById("results-count").value) || 5;
     const resultsContainer = document.getElementById("search-results");
 
-    // Clear any existing content in the results container
-    while (resultsContainer.firstChild) resultsContainer.removeChild(resultsContainer.firstChild);
+    // clear any existing content in the results container
+    while (resultsContainer.firstChild)
+        resultsContainer.removeChild(resultsContainer.firstChild);
 
-    // Initialize the map if it doesn't exist or reset it
+    // initialize the map if it doesn't exist or reset it
     if (!map) {
         map = L.map('map').setView([51.505, -0.09], 2); // Default center and zoom
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -46,7 +49,7 @@ async function searchDestinations() {
         });
     }
 
-    // Fetch data from the server
+    // fetch data from the server
     const response = await fetch(`/api/search/${field}/${encodeURIComponent(pattern)}`);
     if (!response.ok) {
         console.error(`Failed to fetch search results: ${response.statusText}`);
@@ -56,13 +59,13 @@ async function searchDestinations() {
 
     const data = await response.json();
 
-    // Split data into pages and display destinations
+    // split data into pages and display destinations
     const pages = [];
     for (let i = 0; i < data.length; i += resultsPerPage) {
         const pageData = data.slice(i, i + resultsPerPage);
         const pageDiv = document.createElement("div");
         pageDiv.classList.add("page");
-        pageDiv.style.display = i === 0 ? "block" : "none"; // Show only the first page initially
+        pageDiv.style.display = i === 0 ? "block" : "none"; // show only the first page initially
 
         for (const id of pageData) {
             const destinationResponse = await fetch(`/api/destinations/${id + 1}`);
@@ -70,7 +73,7 @@ async function searchDestinations() {
                 const destination = await destinationResponse.json();
                 displayDestination(destination, pageDiv);
 
-                // Add marker for each destination to the map
+                // add marker for each destination to the map
                 const lat = parseFloat(destination["Latitude"]);
                 const lon = parseFloat(destination["Longitude"]);
                 if (!isNaN(lat) && !isNaN(lon)) {
@@ -90,11 +93,11 @@ async function searchDestinations() {
         pages.push(pageDiv);
     }
 
-    // Update navigation buttons
+    // update navigation buttons
     updateNavigation(pages);
 }
 
-// Function to add a marker to the map
+// function to add a marker to the map
 function addMapMarker(destination) {
     const lat = parseFloat(destination["Latitude"]);
     const lon = parseFloat(destination["Longitude"]);
@@ -108,17 +111,17 @@ function addMapMarker(destination) {
     }
 }
 
-// Update navigation buttons based on current page and total pages
+// update navigation buttons based on current page and total pages
 function updateNavigation(pages) {
     document.getElementById("next-page").onclick = () => changePage(pages, 1);
     document.getElementById("prev-page").onclick = () => changePage(pages, -1);
 }
 
-// Change the current page by incrementing/decrementing the page index
+// change the current page by incrementing/decrementing the page index
 function changePage(pages, direction) {
-    pages[currentPage].style.display = "none"; // Hide current page
+    pages[currentPage].style.display = "none"; // hide current page
     currentPage = Math.max(0, Math.min(currentPage + direction, pages.length - 1));
-    pages[currentPage].style.display = "block"; // Show new current page
+    pages[currentPage].style.display = "block"; // show new current page
 }
 
 function displayDestination(destination, resultsContainer) {
@@ -265,6 +268,12 @@ async function createList() {
     const listname = document.getElementById("list-name").value;
     const response = await fetch(`/api/lists/newlist/${listname}`, { method: "POST" });
 
+    const resultsContainer = document.getElementById("lists-display");
+
+    // clear any existing content in the results container
+    while (resultsContainer.firstChild)
+        resultsContainer.removeChild(resultsContainer.firstChild);
+
     if (response.ok) {
         const message = await response.text();
         alert(message); // show success message from server
@@ -277,7 +286,8 @@ async function createList() {
 async function retrieveList() {
     const listname = document.getElementById("list-name").value;
     const resultsContainer = document.getElementById("lists-display");
-
+    
+    // clear any existing content in the results container
     while (resultsContainer.firstChild)
         resultsContainer.removeChild(resultsContainer.firstChild);
 
@@ -333,6 +343,12 @@ async function addDestinationsToList() {
     const destinationNames = input.split(',').map(name => name.trim()); // Split and trim the input
     const listname = document.getElementById("list-name").value;
     const destinationIDs = [];
+
+    const resultsContainer = document.getElementById("lists-display");
+    
+    // clear any existing content in the results container
+    while (resultsContainer.firstChild)
+        resultsContainer.removeChild(resultsContainer.firstChild);
 
     for (const name of destinationNames) {
         try {
