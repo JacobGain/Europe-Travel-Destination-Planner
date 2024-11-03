@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer src="lab3.js"></script>
   <title>SE 3316 - Lab 3</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -31,9 +33,9 @@
       <button id="next-page">Next</button>
     </div>
     <div id="search-results"></div>
-    <div id="map"></div> <!-- For displaying the map -->
+    <div id="map" style="height: 400px; width: 100%; margin-top: 20px;"></div>
   </div>
-  
+
   <div id="list-section">
     <h2>Manage Favorite Lists</h2>
     <input type="text" id="list-name" placeholder="Enter list name">
