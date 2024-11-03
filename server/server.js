@@ -1,9 +1,15 @@
 const fs = require("fs");
 const csvParser = require("csv-parser");
 const express = require("express");
+const path = require("path");
 const app = express();
 
 app.use(express.json());
+app.use('/', express.static("../client"));
+
+// PORT environment variable, part of enviro where process runs
+const port = 3000
+app.listen(port, () => console.log(`Listening on port ${port}...`))
 
 const destinationsJSON = []; // stores the csv data in JSON format
 fs.createReadStream("data/europe-destinations.csv")
@@ -19,6 +25,11 @@ fs.createReadStream("data/europe-destinations.csv")
     .on("end", () => {
         //console.log(destinationsJSON);
     });
+
+app.use((req, res, next) => {
+    console.log(`${req.method} request for ${req.url}`);
+    next();
+});
 
 // item 1, get all information of a given destination ID
 app.get('/api/destinations/:id', (req, res) => {
@@ -98,6 +109,7 @@ app.get('/api/search/:field/:pattern/:n?', (req, res) => {
 // item 5, create new list with given name, return error if name exists
 app.post('/api/lists/newlist/:listname', (req, res) => {
     const listname = req.params.listname; // get the name of the (probably) new list from the parameters
+    const listsPath = "data/lists.json"
     
     // read the lists.json file
     fs.readFile(listsPath, "utf8", (err, data) => {
@@ -264,7 +276,3 @@ app.get('/api/lists/getinfo/:listname', (req, res) => {
         res.json(destinationInfo);
     }); // end of readfile
 });
-
-// PORT environment variable, part of enviro where process runs
-const port = 3000
-app.listen(port, () => console.log(`Listening on port ${port}...`))

@@ -1,11 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="lab3.js"></script>
-    <title>SE 3316 - Lab 3</title>
-  </head>
-  <body>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="lab3.js"></script>
+  <title>SE 3316 - Lab 3</title>
+</head>
+
+<body>
+
+  <div id="search-section">
+    <h2>Search Destinations</h2>
+    <select id="search-field">
+      <option value="Destination">Name</option>
+      <option value="Region">Region</option>
+      <option value="Country">Country</option>
+    </select>
+    <input type="text" id="search-pattern" placeholder="Enter search term">
+    <button onclick="searchDestinations()">Search</button>
+    <div id="search-results"></div>
+    <div id="map"></div> <!-- For displaying the map -->
+  </div>
+
+  <div id="pagination">
+    <label for="results-count">Results per page:</label>
+    <select id="results-count" onchange="changeResultsPerPage()">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+    </select>
+    <button id="prev-page">Previous</button>
+    <button id="next-page">Next</button>
+  </div>
+
+  <div id="list-section">
+    <h2>Manage Favorite Lists</h2>
+    <input type="text" id="list-name" placeholder="Enter list name">
+    <button onclick="createList()">Create List</button>
+    <button onclick="retrieveList()">Retrieve List</button>
+    <button onclick="deleteList()">Delete List</button>
+    <br>  
+    <input type="text" id="destination-ids" placeholder="Enter destination IDs (comma-separated)" />
+    <button onclick="addDestinationsToList()">Add Destinations to List</button>
+    <div id="lists-display"></div>
+
+  </div>
+
+</body>
+
 </html>
