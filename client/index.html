@@ -8,6 +8,7 @@
   <title>SE 3316 - Lab 3</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
 </head>
 
 <body>
@@ -23,7 +24,7 @@
     <button onclick="searchDestinations()">Search</button>
     <div id="pagination">
       <label for="results-count">Results per page:</label>
-      <select id="results-count" onchange="changeResultsPerPage()">
+      <select id="results-count">
         <option value="5">5</option>
         <option value="10">10</option>
         <option value="20">20</option>

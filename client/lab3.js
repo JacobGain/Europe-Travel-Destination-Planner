@@ -2,9 +2,30 @@ let currentPage = 0; // Track the current page index
 
 let map; // Declare the map globally
 
+// Function to validate text-only input
+function validateTextInput(input) {
+    const textOnlyRegex = /^[A-Za-z\s]+$/;
+    return textOnlyRegex.test(input);
+}
+
+// Function to sanitize input using DOMPurify
+function sanitizeInput(input) {
+    return DOMPurify.sanitize(input);
+}
+
 async function searchDestinations() {
     const field = document.getElementById("search-field").value;
-    const pattern = encodeURIComponent(document.getElementById("search-pattern").value);
+    let pattern = document.getElementById("search-pattern").value;
+
+    // Client-side input validation
+    if (!validateTextInput(pattern)) {
+        alert("Search pattern should only contain text (letters and spaces).");
+        return; // Stop the function if validation fails
+    }
+
+    // Sanitize input
+    pattern = sanitizeInput(pattern);
+
     const resultsPerPage = parseInt(document.getElementById("results-count").value) || 5;
     const resultsContainer = document.getElementById("search-results");
 
@@ -26,7 +47,7 @@ async function searchDestinations() {
     }
 
     // Fetch data from the server
-    const response = await fetch(`/api/search/${field}/${pattern}`);
+    const response = await fetch(`/api/search/${field}/${encodeURIComponent(pattern)}`);
     if (!response.ok) {
         console.error(`Failed to fetch search results: ${response.statusText}`);
         alert(`Error fetching search results: ${response.statusText}`);
@@ -86,41 +107,6 @@ function addMapMarker(destination) {
         `);
     }
 }
-// async function searchDestinations() {
-//     const field = document.getElementById("search-field").value;
-//     const pattern = encodeURIComponent(document.getElementById("search-pattern").value);
-//     const resultsPerPage = parseInt(document.getElementById("results-count").value) || 5;
-//     const resultsContainer = document.getElementById("search-results");
-
-//     // Clear any existing content in the results container
-//     while (resultsContainer.firstChild) resultsContainer.removeChild(resultsContainer.firstChild);
-
-//     // Fetch data from the server
-//     const response = await fetch(`/api/search/${field}/${pattern}`);
-//     const data = await response.json();
-
-//     // Split data into pages
-//     const pages = [];
-//     for (let i = 0; i < data.length; i += resultsPerPage) {
-//         const pageData = data.slice(i, i + resultsPerPage);
-//         const pageDiv = document.createElement("div");
-//         pageDiv.classList.add("page");
-//         pageDiv.style.display = i === 0 ? "block" : "none"; // Show only the first page initially
-
-//         // Fetch and display each destination in the page
-//         for (const id of pageData) {
-//             const destinationResponse = await fetch(`/api/destinations/${id + 1}`);
-//             const destination = await destinationResponse.json();
-//             displayDestination(destination, pageDiv);
-//         }
-
-//         resultsContainer.appendChild(pageDiv);
-//         pages.push(pageDiv); // Add the page div to the pages array
-//     }
-
-//     // Update navigation
-//     updateNavigation(pages);
-// }
 
 // Update navigation buttons based on current page and total pages
 function updateNavigation(pages) {
@@ -434,3 +420,12 @@ async function sortDisplayedList() {
         displayDestination(destination, resultsContainer);
     });
 }
+
+// Add event listeners for client-side validation on relevant input fields
+document.getElementById("search-pattern").addEventListener("input", function () {
+    if (!validateTextInput(this.value)) {
+        this.style.borderColor = "red";
+    } else {
+        this.style.borderColor = ""; // Reset to default if valid
+    }
+});
