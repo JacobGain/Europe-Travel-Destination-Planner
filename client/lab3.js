@@ -256,35 +256,95 @@ async function deleteList() {
     }
 }
 
-function addDestinationsToList() {
-    const listname = document.getElementById("list-name").value; // Get the list name from input
-    const idsInput = document.getElementById("destination-ids").value; // Get the destination IDs from input
-    const destinationIDs = idsInput.split(",").map(id => Number(id.trim())).filter(id => !isNaN(id)); // Convert to numbers and filter out invalid entries
+async function addDestinationsToList() {
+    const input = document.getElementById("destination-names").value; // Assuming you have a text box with this ID
+    const destinationNames = input.split(',').map(name => name.trim()); // Split and trim the input
+    const listname = document.getElementById("list-name").value;
+    const destinationIDs = [];
 
-    // Create the request payload
-    const payload = {
-        destinationIDs: destinationIDs
-    };
+    for (const name of destinationNames) {
+        try {
+            // Make a fetch call to your server to search for the destination by name
+            const response = await fetch(`/api/search/Destination/${encodeURIComponent(name)}/1`);
+            if (!response.ok) {
+                throw new Error(`Error fetching destination for "${name}": ${response.statusText}`);
+            }
 
-    // Send the PUT request to update the list
-    fetch(`/api/lists/updatelist/${listname}/destinationIDs`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error(`Error: ${res.status} - ${res.statusText}`);
+            const ids = await response.json();
+            if (ids.length > 0) {
+                destinationIDs.push(ids[0]); // Add 1 to the index to get the ID
+            } else {
+                console.warn(`No destination found for "${name}"`);
+            }
+        } catch (error) {
+            console.error(`Error adding destination "${name}":`, error);
         }
-        return res.text(); // Assuming the server responds with a success message
-    })
-    .then(successMessage => {
-        alert(successMessage); // Show success message to the user
-    })
-    .catch(error => {
-        console.error("Error updating destination IDs:", error);
-        alert("Failed to update destination IDs. Please try again.");
+    }
+
+    // Now update the list with the gathered destination IDs
+    try {
+        const updateResponse = await fetch(`/api/lists/updatelist/${listname}/destinationIDs`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ destinationIDs }),
+        });
+
+        if (!updateResponse.ok) {
+            throw new Error(`Error updating list: ${updateResponse.statusText}`);
+        }
+
+        const result = await updateResponse.text();
+        console.log(result); // success message
+    } catch (error) {
+        console.error('Error updating the list:', error);
+    }
+}
+
+async function sortDisplayedList() {
+    const sortField = document.getElementById("sort-field").value;
+    const listName = document.getElementById("list-name").value;
+    const resultsContainer = document.getElementById("lists-display");
+
+    // Retrieve the list data
+    const response = await fetch(`/api/lists/getIDs/${listName}`);
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        alert(`Error: ${errorMessage}`);
+        return;
+    }
+
+    // Parse the array of destination IDs
+    const destinationIDs = await response.json();
+    const destinations = [];
+
+    // Fetch each destination's details and push them to the array
+    for (const id of destinationIDs) {
+        const destinationResponse = await fetch(`/api/destinations/${id + 1}`);
+        if (destinationResponse.ok) {
+            const destination = await destinationResponse.json();
+            destinations.push(destination);
+        } else {
+            console.error(`Failed to fetch destination with ID ${id + 1}`);
+        }
+    }
+
+    // Sort the destinations based on the selected field
+    destinations.sort((a, b) => {
+        if (a[sortField] < b[sortField]) return -1;
+        if (a[sortField] > b[sortField]) return 1;
+        return 0;
+    });
+
+    // Clear existing content in the results container right before displaying the sorted data
+    while (resultsContainer.firstChild) {
+        resultsContainer.removeChild(resultsContainer.firstChild);
+    }
+
+    // Display each sorted destination using displayDestination()
+    destinations.forEach(destination => {
+        displayDestination(destination, resultsContainer);
     });
 }
