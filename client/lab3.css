@@ -1,0 +1,85 @@
+/* general body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f4f8;
+    margin: 20px;
+}
+
+/* styling for input fields */
+input[type="text"] {
+    width: 300px;
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* styling for buttons */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #075e0c;
+}
+
+/* styling for the display of destinations */
+.destination-item {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* styling for key-value pairs */
+.destination-item p {
+    margin: 5px 0;
+}
+
+/* strong element styling within destination details */
+.destination-item strong {
+    color: #333;
+}
+
+/* styling for section headers */
+#search-section h2, #list-section h2 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* styling for pagination and sort section */
+#pagination, #sort-section {
+    margin-top: 10px;
+}
+
+/* map styling */
+#map {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* responsive design for smaller screens and resizing window */
+@media screen and (max-width: 600px) {
+    input[type="text"] {
+        width: 100%;
+    }
+
+    button {
+        width: 100%; 
+    }
+
+    .destination-item {
+        padding: 10px;
+        margin: 5px 0;
+    }
+}
