@@ -1,7 +1,3 @@
-Here’s a detailed **README.md** for your project repository:
-
----
-
 # Europe Travel Destination Planner
 
 **Europe Travel Destination Planner** is a full-stack RESTful web application designed to make travel planning easy and enjoyable. Users can search for European destinations by name, region, or country, view detailed destination information, and save their favorites into custom lists. The app features a dynamic map visualization and provides an interactive and intuitive user experience.
