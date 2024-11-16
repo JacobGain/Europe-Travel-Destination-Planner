@@ -126,9 +126,3 @@
 - Add user authentication for personalized experiences.  
 - Include additional filters, such as by travel cost or tourist safety.  
 - Integrate external APIs for real-time weather and flight information.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
